@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Paper {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  providerId String @unique
+  title String
+  abstract String
+  authors Author[]
+  publishedDate DateTime
+  updatedDate DateTime
+  primaryCategory String?
+  categories String[]
+  journalRef String?
+  doi String?
+  pdfUrl String?
+  doiUrl String?
+  comment String[]
+  embeddings Float[]
+  retrievalTimestamp DateTime @default(now())
+}
+
+type Author {
+  name String
+  affiliation String?
+}

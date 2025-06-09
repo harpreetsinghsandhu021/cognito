@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const paperController_1 = require("../controller/paperController");
+const paperRoutes = (0, express_1.Router)();
+paperRoutes.route("/getMarkup").get(paperController_1.getHTML);
+paperRoutes.route("/:id").get(paperController_1.getPaper);
+paperRoutes.route("/search/semantic").get(paperController_1.getSearchResults);
+paperRoutes.route("/summary/:id").get(paperController_1.getSummary);
+exports.default = paperRoutes;
