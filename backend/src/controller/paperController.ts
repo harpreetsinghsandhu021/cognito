@@ -110,21 +110,17 @@ export const extractHTMLFromPdf = async (pdf: Buffer, res: Response) => {
 };
 
 const sanitizeHTML = async (html: string, response: Response) => {
-  console.log("runnngi");
+  console.log("starting sanitization");
   let isClientDisconnected = false;
+  let chunkCount = 0;
 
   const disconnectHandler = () => {
-    console.log(
-      "Client disconnected or aborted. Signaling backend to stop processing."
-    );
+    console.log("Client disconnected");
     isClientDisconnected = true;
   };
 
   response.on("close", disconnectHandler);
-  response.on("error", (err) => {
-    console.log("Response stream error:", err);
-    isClientDisconnected = true;
-  });
+  response.on("error", disconnectHandler);
 
   try {
     const ai = new GoogleGenAI({
@@ -166,64 +162,63 @@ const sanitizeHTML = async (html: string, response: Response) => {
       html +
       "\n";
 
-    const generationConfig = {
-      model: "gemini-2.5-pro-preview-06-05",
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-
-      maxOutputTokens: 40000,
-      temperature: 0.7, // Add temperature for more controlled output
-      topP: 0.95,
-      topK: 40,
-      thinkingConfig: {
-        thinkingBudget: 25000,
-      },
-    };
-
     const res = await ai.models.generateContentStream({
       model: "gemini-2.5-pro-preview-06-05",
-      contents: generationConfig.contents,
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
-        maxOutputTokens: generationConfig.maxOutputTokens,
-        temperature: generationConfig.temperature,
-        topP: generationConfig.topP,
-        topK: generationConfig.topK,
-        thinkingConfig: generationConfig.thinkingConfig,
+        maxOutputTokens: 40000,
+        temperature: 0.7,
+        topP: 0.95,
+        topK: 40,
+        thinkingConfig: {
+          thinkingBudget: 25000,
+        },
       },
     });
 
+    console.log("Starting to process Gemini stream...");
+
     for await (const chunk of res) {
-      if (isClientDisconnected || response.writableEnded) {
-        console.log(
-          "Client disconnected or response stream ended. Stopping stream"
-        );
+      if (isClientDisconnected) {
+        console.log("Stopping stream - client disconnected");
         break;
       }
 
-      const text = chunk.candidates![0].content?.parts![0].text;
+      console.log("Received chunk from Gemini:", chunk);
+
+      const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (text) {
-        response.write(JSON.stringify(text));
-        console.log("sending chunk", text.slice(0, 10), ".....");
-      }
+        chunkCount++;
 
-      if (!isClientDisconnected && !response.writableEnded) {
-        response.end();
-        console.log("Vertex AI stream completed and sent to client.");
-      } else {
-        console.log(
-          "Vertex AI stream completed, but response was already handled (client disconnected or stream ended)."
-        );
+        try {
+          if (!isClientDisconnected && !response.writableEnded) {
+            response.write(JSON.stringify(text));
+            console.log(`Sent chunk ${chunkCount}: ${text.slice(0, 50)}...`);
+          }
+        } catch (writeError) {
+          console.log("Write failed - client disconnected:", writeError);
+          break;
+        }
       }
     }
+
+    console.log(`Stream processing completed. Total chunks: ${chunkCount}`);
+
+    if (!isClientDisconnected && !response.writableEnded) {
+      response.end();
+      console.log("Response stream ended successfully");
+    } else {
+      console.log("Response already ended or client disconnected");
+    }
   } catch (error) {
-    if (!response.headersSent) {
-      // Check if headers have been sent before sending status
-      response.status(500).send("An error occurred during content processing.");
-    } else if (!response.writableEnded) {
-      response.end(); // If headers sent but stream not ended, close it gracefully
+    console.error("Error during sanitization:", error);
+    if (!response.headersSent && !isClientDisconnected) {
+      response.status(500).send("Processing error");
     }
   } finally {
     response.off("close", disconnectHandler);
     response.off("error", disconnectHandler);
+    console.log("Cleanup completed");
   }
 };
