@@ -1,6 +1,6 @@
 "use client";
 
-import { IconArrowNarrowRight } from "@tabler/icons-react";
+import { IconArrowNarrowRight, IconArrowRight } from "@tabler/icons-react";
 import { categories, cn, pastels } from "../../lib/utils";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { Author, Id, PublishedDate } from "@/app/interfaces";
@@ -64,7 +64,7 @@ export const BentoGridItem = ({
   return (
     <div
       className={cn(
-        "group/bento transition duration-200 rounded-xl row-span-1",
+        "group/bento transition duration-200 cursor-pointer rounded-xl row-span-1",
         `${className} ${space_gr.className}`
       )}
       onClick={() => router.push(`/papers/${(id as Id).$oid}`)}
@@ -97,7 +97,7 @@ export const BentoGridItem = ({
           <div className="flex justify-between w-full">
             <button className="font-bold">
               <span> Read More </span>
-              <IconArrowNarrowRight className="inline-block transition duration-200 group-hover/bento:translate-x-3 group-hover/bento:scale-x-200 group-hover/bento:scale-y-125 " />
+              <IconArrowRight className="ml-0.5 inline-block scale-x-125 font-bold group-hover/bento:-rotate-12" />
             </button>
             <div>
               <span> {authors && authors[0]?.name},</span>

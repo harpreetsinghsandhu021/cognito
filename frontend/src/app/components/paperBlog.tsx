@@ -6,6 +6,7 @@ import { Paper } from "../interfaces";
 import { BentoGridItem } from "./ui/bentogrid";
 import { title } from "process";
 import { IconArrowRight } from "@tabler/icons-react";
+import dayjs from "dayjs";
 
 const space_gr = Space_Grotesk({
   weight: ["300", "400", "500", "600", "700"],
@@ -20,12 +21,18 @@ const space_mono = Space_Mono({
 const PaperBlog = ({ paper }: { paper: Paper }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [paperContent, setPaperContent] = useState<string>("");
+  const [stream, setStream] = useState<ReadableStream<
+    Uint8Array<ArrayBufferLike>
+  > | null>(null);
 
   useEffect(() => {
     if (paper.pdfUrl) {
       fetch(
         `http://localhost:8000/api/v1/papers/getMarkup?pdfUrl=${paper.pdfUrl}`
       ).then(async (res) => {
+        console.log(res);
+
+        setStream(res.body);
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
 
@@ -35,16 +42,33 @@ const PaperBlog = ({ paper }: { paper: Paper }) => {
 
           const chunk = decoder.decode(text?.value);
           try {
-            const data = JSON.parse(chunk);
+            if (chunk) {
+              const data = JSON.parse(chunk);
+              console.log(data);
 
-            setPaperContent((prevPaperContent) =>
-              prevPaperContent.concat(data)
-            );
+              setPaperContent((prevPaperContent) =>
+                prevPaperContent.concat(data)
+              );
+            }
           } catch (error) {}
         }
       });
     }
   }, [paper.pdfUrl]);
+
+  useEffect(() => {
+    console.log(window.performance.getEntriesByType("navigation")[0].entryType);
+
+    if (window.performance.getEntriesByType) {
+      if (
+        window.performance.getEntriesByType("navigation")[0].entryType ===
+        "navigation"
+      ) {
+        // stream?.cancel();
+        // alert("reloaded");
+      }
+    }
+  }, []);
 
   return (
     <div
@@ -71,14 +95,22 @@ const PaperBlog = ({ paper }: { paper: Paper }) => {
               </p>
             </div>
           </div>
-          <div className="mx-4 mb-4">
-            {paper?.authors.map((a, i) => (
-              <span key={i} className="text-lg font-bold">
-                {a.name} {i === paper.authors.length - 1 ? "" : " | "}
-              </span>
-            ))}
+          <div className="mx-4 flex">
+            <div>
+              {paper?.authors.map((a, i) => (
+                <span key={i} className="text-lg font-bold">
+                  {a.name} {i === paper.authors.length - 1 ? "" : " | "}
+                </span>
+              ))}
+            </div>
+            <span className="font-bold ml-auto">
+              Published:{" "}
+              {dayjs(paper.publishedDate.$date as string).format(
+                "MMMM D, YYYY [at] h:mm A"
+              )}
+            </span>
           </div>
-          <div className="mx-4 inline-block group mb-4">
+          <div className="mx-4 inline-block group">
             <a
               href={paper.pdfUrl}
               target="_blank"
@@ -88,12 +120,15 @@ const PaperBlog = ({ paper }: { paper: Paper }) => {
               <IconArrowRight className="ml-0.5 inline-block scale-x-125 font-bold group-hover:-rotate-12" />
             </a>
           </div>
+
+          <p className="mx-4 text-lg mb-2">{paper.abstract}</p>
+
           <div className="marquee bg-yellow-50 z-50 border-t-2 border-b-2 py-2">
             <p className="text-xl">
               <strong className="font-semibold">
                 &nbsp; AI-Generated Content:
               </strong>{" "}
-              This content was generated and refined by Gemini Flash AI. While
+              This content was generated and refined by Gemini Pro AI. While
               we've aimed for high fidelity, please note that AI-generated
               content can sometimes contain inaccuracies or formatting
               discrepancies. We recommend reviewing the output.
@@ -111,7 +146,7 @@ const PaperBlog = ({ paper }: { paper: Paper }) => {
 
           <div ref={containerRef} className="px-4">
             <div
-              className="paper-content text-xl -mt-2"
+              className="paper-content text-xl"
               dangerouslySetInnerHTML={{ __html: paperContent }}
             ></div>
           </div>

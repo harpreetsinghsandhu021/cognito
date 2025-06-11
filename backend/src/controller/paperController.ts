@@ -4,6 +4,7 @@ import prisma from "../utils/prisma";
 import { generateEmbedding } from "../utils/embeddings";
 import pdf2html from "pdf2html";
 import axios from "axios";
+import { GoogleGenAI } from "@google/genai";
 require("dotenv").config();
 
 export const getSearchResults = catchAsync(
@@ -66,8 +67,6 @@ export const getSummary = catchAsync(async (req: Request, res: Response) => {
 export const getPaper = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
 
-  console.log(id);
-
   const paper = await prisma.paper.findUnique({
     where: {
       id,
@@ -105,11 +104,35 @@ export const getHTML = catchAsync(async (req: Request, res: Response) => {
 export const extractHTMLFromPdf = async (pdf: Buffer, res: Response) => {
   const data = await pdf2html.html(pdf);
 
+  console.log("data done");
+
   sanitizeHTML(data!, res);
 };
 
 const sanitizeHTML = async (html: string, response: Response) => {
+  console.log("runnngi");
+  let isClientDisconnected = false;
+
+  const disconnectHandler = () => {
+    console.log(
+      "Client disconnected or aborted. Signaling backend to stop processing."
+    );
+    isClientDisconnected = true;
+  };
+
+  response.on("close", disconnectHandler);
+  response.on("error", (err) => {
+    console.log("Response stream error:", err);
+    isClientDisconnected = true;
+  });
+
   try {
+    const ai = new GoogleGenAI({
+      vertexai: true,
+      project: process.env.GOOGLE_CLOUD_PROJECT,
+      location: "global",
+    });
+
     const prompt =
       "You're an expert HTML processor. Your job is to take raw, potentially unsanitized HTML content and perform several critical operations:\n\n" +
       "---" +
@@ -122,7 +145,7 @@ const sanitizeHTML = async (html: string, response: Response) => {
       "* **Malformed HTML:** Correct any basic malformed HTML (e.g., unclosed tags, incorrect nesting) to produce valid, well-formed HTML.\n" +
       "* **Specific Content Removal:**\n" +
       '    * Remove all information related to **"Prepared using sagej.cls"**.\n' +
-      "    * Remove the **title** of the document, **authors** of the document, and **keywords**.\n" +
+      "    * Remove the **title** of the document, **authors** of the document, **abstract** and **keywords**.\n" +
       '    * Remove any information explicitly stating **"about the paper"**.\n\n' +
       '    * Remove any information regarding the images along with their captions."**.\n\n' +
       "---" +
@@ -136,7 +159,6 @@ const sanitizeHTML = async (html: string, response: Response) => {
       "* **Links:** Ensure any identified URLs are correctly wrapped in **anchor tags (`<a>`) with `href` attributes**.\n" +
       "* **Code & Mathematics:** IMPORTANT: Wrap any **coding notations** or **mathematical notations** in `<code>` tags.\n" +
       "* **Blockquotes:** Identify quoted text and wrap it in `<blockquote>`.\n" +
-      "* **Important:** Make sure to convert the full document.\n" +
       "* **General Structure:** Use `<div>` and `<span>` sparingly, only when necessary for grouping or inline styling hooks after semantic tags have been applied. For streaming responses, ensure no newline character (`\n`)** are used.\n\n" +
       "---" +
       "\n\n" +
@@ -144,8 +166,64 @@ const sanitizeHTML = async (html: string, response: Response) => {
       html +
       "\n";
 
-    console.log("Vertex AI stream completed and sent to client.");
+    const generationConfig = {
+      model: "gemini-2.5-pro-preview-06-05",
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+
+      maxOutputTokens: 40000,
+      temperature: 0.7, // Add temperature for more controlled output
+      topP: 0.95,
+      topK: 40,
+      thinkingConfig: {
+        thinkingBudget: 25000,
+      },
+    };
+
+    const res = await ai.models.generateContentStream({
+      model: "gemini-2.5-pro-preview-06-05",
+      contents: generationConfig.contents,
+      config: {
+        maxOutputTokens: generationConfig.maxOutputTokens,
+        temperature: generationConfig.temperature,
+        topP: generationConfig.topP,
+        topK: generationConfig.topK,
+        thinkingConfig: generationConfig.thinkingConfig,
+      },
+    });
+
+    for await (const chunk of res) {
+      if (isClientDisconnected || response.writableEnded) {
+        console.log(
+          "Client disconnected or response stream ended. Stopping stream"
+        );
+        break;
+      }
+
+      const text = chunk.candidates![0].content?.parts![0].text;
+
+      if (text) {
+        response.write(JSON.stringify(text));
+        console.log("sending chunk", text.slice(0, 10), ".....");
+      }
+
+      if (!isClientDisconnected && !response.writableEnded) {
+        response.end();
+        console.log("Vertex AI stream completed and sent to client.");
+      } else {
+        console.log(
+          "Vertex AI stream completed, but response was already handled (client disconnected or stream ended)."
+        );
+      }
+    }
   } catch (error) {
-    console.log(error);
+    if (!response.headersSent) {
+      // Check if headers have been sent before sending status
+      response.status(500).send("An error occurred during content processing.");
+    } else if (!response.writableEnded) {
+      response.end(); // If headers sent but stream not ended, close it gracefully
+    }
+  } finally {
+    response.off("close", disconnectHandler);
+    response.off("error", disconnectHandler);
   }
 };

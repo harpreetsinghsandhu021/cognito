@@ -39,7 +39,7 @@
 }
 
 .paper-content::first-line {
-  @apply text-transparent;
+  /* @apply text-transparent; */
 }
 
 .box1 {

@@ -4,7 +4,13 @@ import cors from "cors";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: true, // or specify your frontend domain
+    credentials: true,
+    exposedHeaders: ["*"],
+  })
+);
 
 app.use(express.json());
 
