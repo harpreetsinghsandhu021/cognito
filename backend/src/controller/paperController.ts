@@ -90,9 +90,72 @@ export const getPaper = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+export const getRelatedPapers = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const { limit = 5 } = req.query;
+
+    const sourcePaper = await prisma.paper.findUnique({
+      where: { id },
+      select: { abstract: true },
+    });
+
+    if (!sourcePaper) {
+      return res.status(404).json({
+        status: "error",
+        message: "No Paper found with the given ID",
+      });
+    }
+
+    const queryVector = await generateEmbedding(sourcePaper.abstract);
+
+    const results = await prisma.$runCommandRaw({
+      aggregate: "Paper",
+      pipeline: [
+        {
+          $vectorSearch: {
+            index: "vector_index",
+            path: "embeddings",
+            queryVector: queryVector as number[],
+            numCandidates: 20,
+            limit: Number(limit),
+          },
+        },
+        {
+          $replaceWith: {
+            $mergeObjects: [
+              "$$ROOT",
+              { id: { $toString: "$_id" } }, // Convert _id to string format
+            ],
+          },
+        },
+        {
+          $match: {
+            id: { $ne: id }, // Now we can match against the converted id
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            abstract: 1,
+            primaryCategory: 1,
+          },
+        },
+      ],
+      cursor: {},
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: (results.cursor as any).firstBatch,
+    });
+  }
+);
+
 export const getHTML = catchAsync(async (req: Request, res: Response) => {
   const { pdfUrl } = req.query;
-  console.log(pdfUrl);
 
   const pdfBuffer = await axios.get(pdfUrl as string, {
     responseType: "arraybuffer",
@@ -101,16 +164,93 @@ export const getHTML = catchAsync(async (req: Request, res: Response) => {
   extractHTMLFromPdf(pdfBuffer.data, res);
 });
 
+export const getHomePageData = catchAsync(
+  async (req: Request, res: Response) => {
+    const results = await prisma.$runCommandRaw({
+      aggregate: "Paper",
+      pipeline: [
+        {
+          $facet: {
+            recentPapers: [
+              { $sort: { publishedDate: -1 } },
+              { $limit: 20 },
+              {
+                $project: {
+                  _id: 1,
+                  title: 1,
+                  abstract: 1,
+                  authors: 1,
+                  className: 1,
+                },
+              },
+            ],
+            topCategories: [
+              { $unwind: "$categories" },
+              {
+                $group: {
+                  _id: "$categories",
+                  count: { $sum: 1 },
+                  papers: {
+                    $push: {
+                      id: "$_id",
+                      title: "$title",
+                      publishedDate: "$publishedDate",
+                    },
+                  },
+                },
+              },
+              { $sort: { count: -1 } },
+              { $limit: 20 },
+              {
+                $project: {
+                  category: "$_id",
+                  count: 1,
+                  recentPapers: { $slice: ["$papers", 3] },
+                },
+              },
+            ],
+          },
+        },
+      ],
+      cursor: {},
+    });
+
+    const data = (results.cursor as any).firstBatch[0];
+    if (data.recentPapers) {
+      data.recentPapers = data.recentPapers.map(
+        (paper: any, index: number) => ({
+          ...paper,
+          className: generateBentoClassName(index),
+        })
+      );
+    }
+
+    res.json({
+      status: "success",
+      data,
+    });
+  }
+);
+
+const generateBentoClassName = (index: number): string => {
+  const patterns = [
+    "md:col-span-2",
+    "md:col-span-1",
+    "md:col-span-1",
+    "md:col-span-2",
+    "md:col-span-2",
+    "md:col-span-1",
+  ];
+  return patterns[index % patterns.length];
+};
+
 export const extractHTMLFromPdf = async (pdf: Buffer, res: Response) => {
   const data = await pdf2html.html(pdf);
-
-  console.log("data done");
 
   sanitizeHTML(data!, res);
 };
 
 const sanitizeHTML = async (html: string, response: Response) => {
-  console.log("starting sanitization");
   let isClientDisconnected = false;
   let chunkCount = 0;
 
@@ -183,8 +323,6 @@ const sanitizeHTML = async (html: string, response: Response) => {
         console.log("Stopping stream - client disconnected");
         break;
       }
-
-      console.log("Received chunk from Gemini:", chunk);
 
       const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text;
 

@@ -2,11 +2,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { categories, cn } from "../lib/utils";
-import { Paper } from "../interfaces";
+import { Id, Paper } from "../interfaces";
 import { BentoGridItem } from "./ui/bentogrid";
 import { title } from "process";
 import { IconArrowRight } from "@tabler/icons-react";
 import dayjs from "dayjs";
+import axios from "axios";
 
 const space_gr = Space_Grotesk({
   weight: ["300", "400", "500", "600", "700"],
@@ -18,9 +19,10 @@ const space_mono = Space_Mono({
   subsets: ["latin", "vietnamese"],
 });
 
-const PaperBlog = ({ paper }: { paper: Paper }) => {
+const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [paperContent, setPaperContent] = useState<string>("");
+  const [relatedPapers, setRelatedPapers] = useState<Paper[] | null>(null);
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | undefined>(
     undefined
   );
@@ -35,8 +37,6 @@ const PaperBlog = ({ paper }: { paper: Paper }) => {
         }
       )
         .then(async (res) => {
-          console.log(res);
-
           const reader = res.body?.getReader();
           readerRef.current = reader;
           const decoder = new TextDecoder();
@@ -76,6 +76,23 @@ const PaperBlog = ({ paper }: { paper: Paper }) => {
       };
     }
   }, [paper.pdfUrl]);
+
+  async function fetchRelatedPapers() {
+    console.log(paper);
+
+    const res = await axios.get(
+      `http://localhost:8000/api/v1/papers/getRelatedPapers/${id}`
+    );
+
+    if (res.status === 200) {
+      const data = res.data;
+      setRelatedPapers(data.data);
+    }
+  }
+
+  useEffect(() => {
+    fetchRelatedPapers();
+  }, []);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -124,25 +141,25 @@ const PaperBlog = ({ paper }: { paper: Paper }) => {
                 </span>
               ))}
             </div>
-            <span className="font-bold ml-auto">
-              Published:{" "}
-              {dayjs(paper.publishedDate.$date as string).format(
-                "MMMM D, YYYY [at] h:mm A"
-              )}
-            </span>
           </div>
-          <div className="mx-4 inline-block group">
+          <div className="mx-4 group flex">
             <a
               href={paper.pdfUrl}
               target="_blank"
-              className="underline text-xl "
+              className="underline font-bold text-lg"
             >
               Original Pdf
               <IconArrowRight className="ml-0.5 inline-block scale-x-125 font-bold group-hover:-rotate-12" />
             </a>
+            <p className="font-bold ml-auto text-lg">
+              Published:{" "}
+              {dayjs(paper.publishedDate as string).format(
+                "MMMM D, YYYY [at] h:mm A"
+              )}
+            </p>
           </div>
 
-          <p className="mx-4 text-lg mb-2">{paper.abstract}</p>
+          <p className="mx-4 text-lg mb-2 mt-4">{paper.abstract}</p>
 
           <div className="marquee bg-yellow-50 z-50 border-t-2 border-b-2 py-2">
             <p className="text-xl">
@@ -172,25 +189,20 @@ const PaperBlog = ({ paper }: { paper: Paper }) => {
             ></div>
           </div>
           <div className="mt-4 px-4">
-            <h6
-              className={cn(
-                "text-4xl font-extrabold capitalize max-w-[50%] leading-[6.3rem] ",
-                space_mono.className
-              )}
-            >
-              Related Articles
-            </h6>
+            <h2 className="text-2xl font-semibold mb-2 "> Related Articles</h2>
             <div className="flex gap-4">
-              {[paper, paper, paper, paper].map((item: Paper, i) => (
-                <BentoGridItem
-                  index={i}
-                  key={i}
-                  id={item._id}
-                  category={item.primaryCategory}
-                  title={item.title}
-                  description={item.abstract}
-                />
-              ))}
+              {relatedPapers &&
+                relatedPapers?.map((item: Paper, i) => (
+                  <BentoGridItem
+                    index={i}
+                    key={i}
+                    id={item._id}
+                    className="md:col-span-4 flex-1"
+                    category={item.primaryCategory}
+                    title={item.title}
+                    description={item.abstract}
+                  />
+                ))}
             </div>
           </div>
         </div>

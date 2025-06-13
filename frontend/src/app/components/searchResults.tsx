@@ -4,7 +4,7 @@ import { BentoGrid, BentoGridItem } from "./ui/bentogrid";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Loader from "./ui/loader";
-import { Paper } from "../interfaces";
+import { Paper, PublishedDate } from "../interfaces";
 
 const SearchResults = () => {
   const searchParams = useSearchParams();
@@ -52,7 +52,7 @@ const SearchResults = () => {
               title={item.title}
               description={item.abstract}
               category={item.primaryCategory}
-              publishedDate={item.publishedDate}
+              publishedDate={item.publishedDate as PublishedDate}
               authors={item.authors}
               className={"md:col-span-3"}
             />

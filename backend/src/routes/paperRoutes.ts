@@ -4,11 +4,15 @@ import {
   getSummary,
   getPaper,
   getHTML,
+  getHomePageData,
+  getRelatedPapers,
 } from "../controller/paperController";
 
 const paperRoutes = Router();
 
 paperRoutes.route("/getMarkup").get(getHTML);
+paperRoutes.route("/getHomeData").get(getHomePageData);
+paperRoutes.route("/getRelatedPapers/:id").get(getRelatedPapers);
 
 paperRoutes.route("/:id").get(getPaper);
 

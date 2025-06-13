@@ -46,7 +46,6 @@ export const BentoGridItem = ({
   publishedDate,
   authors,
   header,
-  icon,
 }: {
   index: number;
   className?: string;
@@ -58,7 +57,6 @@ export const BentoGridItem = ({
   publishedDate?: PublishedDate;
   authors?: Author[];
   header?: React.ReactNode;
-  icon?: React.ReactNode;
 }) => {
   const router = useRouter();
   return (
@@ -100,8 +98,18 @@ export const BentoGridItem = ({
               <IconArrowRight className="ml-0.5 inline-block scale-x-125 font-bold group-hover/bento:-rotate-12" />
             </button>
             <div>
-              <span> {authors && authors[0]?.name},</span>
-              <span> {authors && authors[1]?.name}...</span>
+              {className === "md:col-span-2" ? (
+                <span> {authors && authors[0]?.name},</span>
+              ) : (
+                <span> {authors && authors[0]?.name}...</span>
+              )}
+
+              {className === "md:col-span-2" && (
+                <span> {authors && authors[1] && authors[1]?.name}</span>
+              )}
+              {className === "md:col-span-2" && (
+                <span> {authors && authors[2] && authors[2]?.name}...</span>
+              )}
             </div>
           </div>
         </div>
