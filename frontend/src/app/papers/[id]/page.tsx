@@ -20,7 +20,7 @@ const page = async ({ params }: { params: Promise<{ id: string }> }) => {
   return (
     <main>
       <Navbar />
-      {paper && <PaperBlog paper={paper} />}
+      {paper && <PaperBlog id={id} paper={paper} />}
     </main>
   );
 };

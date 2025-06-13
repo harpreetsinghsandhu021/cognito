@@ -3,7 +3,7 @@ export interface Paper {
   providerId: string;
   title: string;
   abstract: string;
-  publishedDate: PublishedDate;
+  publishedDate: PublishedDate | string;
   updatedDate: PublishedDate;
   primaryCategory: string;
   categories: string[];
