@@ -4,6 +4,5 @@ node_modules
 
 /src/generated/prisma
 
-*.json
-
+iconic-computer-358503-01ad8b25af47.json
 dist
