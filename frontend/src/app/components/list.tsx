@@ -31,6 +31,7 @@ export async function List() {
               id={item._id}
               title={item.title}
               complete={false}
+              category={item.primaryCategory}
               authors={item.authors}
               description={item.abstract}
               className={item.className}

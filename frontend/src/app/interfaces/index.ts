@@ -11,6 +11,7 @@ export interface Paper {
   doi: null;
   pdfUrl: string;
   doiUrl: null;
+  html: string;
   embeddings: number[];
   retrievalTimestamp: PublishedDate;
   authors: Author[];
