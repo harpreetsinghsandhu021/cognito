@@ -1,29 +1,30 @@
 import axios from "axios";
 import { generateEmbedding } from "../utils/embeddings";
 import prisma from "../utils/prisma";
+import { getHTML } from "../utils/html";
 const xml2js = require("xml2js");
 const parser = new xml2js.Parser();
 
-const BATCH_SIZE = 100;
-const TARGET_TOTAL_PAPERS = 500;
+const BATCH_SIZE = 10;
+const TARGET_TOTAL_PAPERS = 1000;
 const CATEGORIES = [
-  "AI",
-  "CE",
-  "CL",
-  "CC",
-  "CG",
-  "DS",
-  "DB",
-  "CV",
-  "CR",
-  "LG",
-  "MS",
-  "CY",
+  "cs.AI",
+  "cs.CE",
+  "cs.CL",
+  "cs.CC",
+  "cs.CG",
+  "cs.DS",
+  "cs.DB",
+  "cs.CV",
+  "cs.CR",
+  "cs.LG",
+  "cs.MS",
+  "cs.CY",
 ];
 
 async function fetchAndProcessPapers(start: number): Promise<any> {
   const res = await axios.get(
-    `http://export.arxiv.org/api/query?search_query=all:${CATEGORIES[11]}&start=${start}&max_results=${BATCH_SIZE}`
+    `http://export.arxiv.org/api/query?search_query=all:${CATEGORIES[0]}&start=${start}&max_results=${BATCH_SIZE}`
   );
   const xml = res.data;
 
@@ -66,7 +67,7 @@ async function fetchAndProcessPapers(start: number): Promise<any> {
 }
 
 async function runIngestion() {
-  let startIndex = 0;
+  let startIndex = 384;
   let fetchCount = 0;
   let totalAvailablePapers = TARGET_TOTAL_PAPERS;
 
@@ -155,7 +156,11 @@ async function processAndIngestPaper(entry: arxivData) {
       doiUrl: entry.link.find((l) => l.$.title == "doi")?.$.href || null,
       comment: entry["arxiv:comment"] ? entry["arxiv:comment"][0].$[0] : [""],
       embeddings: [] as number[],
+      html: "",
     };
+
+    const html = await getHTML(paper.pdfUrl as string);
+    paper.html = html as string;
 
     if (paper.abstract.length > 0) {
       const embeddings = await generateEmbedding(paper.abstract);

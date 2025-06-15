@@ -21,61 +21,61 @@ const space_mono = Space_Mono({
 
 const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [paperContent, setPaperContent] = useState<string>("");
+  // const [paperContent, setPaperContent] = useState<string>("");
   const [relatedPapers, setRelatedPapers] = useState<Paper[] | null>(null);
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | undefined>(
     undefined
   );
 
-  useEffect(() => {
-    if (paper.pdfUrl) {
-      const controller = new AbortController();
-      fetch(
-        `http://localhost:8000/api/v1/papers/getMarkup?pdfUrl=${paper.pdfUrl}`,
-        {
-          signal: controller.signal,
-        }
-      )
-        .then(async (res) => {
-          const reader = res.body?.getReader();
-          readerRef.current = reader;
-          const decoder = new TextDecoder();
+  // useEffect(() => {
+  //   if (paper.pdfUrl) {
+  //     const controller = new AbortController();
+  //     fetch(
+  //       `http://localhost:8000/api/v1/papers/getMarkup?pdfUrl=${paper.pdfUrl}`,
+  //       {
+  //         signal: controller.signal,
+  //       }
+  //     )
+  //       .then(async (res) => {
+  //         const reader = res.body?.getReader();
+  //         readerRef.current = reader;
+  //         const decoder = new TextDecoder();
 
-          while (true) {
-            const text = await reader?.read();
-            if (text?.done) break;
+  //         while (true) {
+  //           const text = await reader?.read();
+  //           if (text?.done) break;
 
-            const chunk = decoder.decode(text?.value);
-            try {
-              if (chunk) {
-                const data = JSON.parse(chunk);
-                console.log(data);
+  //           const chunk = decoder.decode(text?.value);
+  //           try {
+  //             if (chunk) {
+  //               const data = JSON.parse(chunk);
+  //               console.log(data);
 
-                setPaperContent((prevPaperContent) =>
-                  prevPaperContent.concat(data)
-                );
-              }
-            } catch (error: Error | any) {
-              if (error.name !== "AbortError") {
-                console.log("Stream error:", error);
-              }
-            }
-          }
-        })
-        .catch((error) => {
-          if (error.name !== "AbortError") {
-            console.log("Fetch error:", error);
-          }
-        });
+  //               setPaperContent((prevPaperContent) =>
+  //                 prevPaperContent.concat(data)
+  //               );
+  //             }
+  //           } catch (error: Error | any) {
+  //             if (error.name !== "AbortError") {
+  //               console.log("Stream error:", error);
+  //             }
+  //           }
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         if (error.name !== "AbortError") {
+  //           console.log("Fetch error:", error);
+  //         }
+  //       });
 
-      return () => {
-        controller.abort();
-        if (readerRef.current) {
-          readerRef.current.cancel();
-        }
-      };
-    }
-  }, [paper.pdfUrl]);
+  //     return () => {
+  //       controller.abort();
+  //       if (readerRef.current) {
+  //         readerRef.current.cancel();
+  //       }
+  //     };
+  //   }
+  // }, [paper.pdfUrl]);
 
   async function fetchRelatedPapers() {
     console.log(paper);
@@ -86,6 +86,8 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
 
     if (res.status === 200) {
       const data = res.data;
+      console.log(data);
+
       setRelatedPapers(data.data);
     }
   }
@@ -111,108 +113,106 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
   return (
     <div
       className={cn(
-        "max-w-6xl border-r-2 border-l-2 border-b-2  mx-auto pt-40 pb-10 mb-20",
+        "max-w-6xl border-r-2 border-l-2  mx-auto pt-40 pb-40",
         space_gr.className
       )}
     >
-      {paperContent && (
-        <div className="border-t-2">
-          <div className="flex items-end px-4 pb-4 ">
-            <h1
-              className={cn(
-                "text-8xl font-extrabold capitalize max-w-[60%] break-words leading-[6.3rem] ",
-                space_mono.className
-              )}
-            >
-              {paper?.title}
-            </h1>
+      <div className="border-t-2 border-b-2 pb-8">
+        <div className="flex items-end px-4 pb-4">
+          <h1
+            className={cn(
+              "text-8xl font-extrabold capitalize max-w-[60%] break-words leading-[6.3rem] ",
+              space_mono.className
+            )}
+          >
+            {paper?.title}
+          </h1>
 
-            <div className="flex flex-1 gap-2 justify-end ">
-              <p className="text-xl font-bold">
-                {categories[paper.primaryCategory as keyof typeof categories]}
-              </p>
-            </div>
-          </div>
-          <div className="mx-4 flex">
-            <div>
-              {paper?.authors.map((a, i) => (
-                <span key={i} className="text-lg font-bold">
-                  {a.name} {i === paper.authors.length - 1 ? "" : " | "}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="mx-4 group flex">
-            <a
-              href={paper.pdfUrl}
-              target="_blank"
-              className="underline font-bold text-lg"
-            >
-              Original Pdf
-              <IconArrowRight className="ml-0.5 inline-block scale-x-125 font-bold group-hover:-rotate-12" />
-            </a>
-            <p className="font-bold ml-auto text-lg">
-              Published:{" "}
-              {dayjs(paper.publishedDate as string).format(
-                "MMMM D, YYYY [at] h:mm A"
-              )}
+          <div className="flex flex-1 gap-2 justify-end ">
+            <p className="text-xl font-bold">
+              {categories[paper.primaryCategory as keyof typeof categories]}
             </p>
-          </div>
-
-          <p className="mx-4 text-lg mb-2 mt-4">{paper.abstract}</p>
-
-          <div className="marquee bg-yellow-50 z-50 border-t-2 border-b-2 py-2">
-            <p className="text-xl">
-              <strong className="font-semibold">
-                &nbsp; AI-Generated Content:
-              </strong>{" "}
-              This content was generated and refined by Gemini Pro AI. While
-              we've aimed for high fidelity, please note that AI-generated
-              content can sometimes contain inaccuracies or formatting
-              discrepancies. We recommend reviewing the output.
-            </p>
-            <p className="text-xl">
-              <strong className="font-semibold">
-                &nbsp; AI-Generated Content:
-              </strong>{" "}
-              This content was generated and refined by Gemini Flash AI. While
-              we've aimed for high fidelity, please note that AI-generated
-              content can sometimes contain inaccuracies or formatting
-              discrepancies. We recommend reviewing the output.
-            </p>
-          </div>
-
-          <div ref={containerRef} className="px-4">
-            <div
-              className="paper-content text-xl"
-              dangerouslySetInnerHTML={{ __html: paperContent }}
-            ></div>
-          </div>
-          <div className="mt-4 px-4">
-            <h2 className="text-2xl font-semibold mb-2 "> Related Articles</h2>
-            <div className="flex gap-4">
-              {relatedPapers &&
-                relatedPapers?.map((item: Paper, i) => (
-                  <BentoGridItem
-                    index={i}
-                    key={i}
-                    id={item._id}
-                    className="md:col-span-4 flex-1"
-                    category={item.primaryCategory}
-                    title={item.title}
-                    description={item.abstract}
-                  />
-                ))}
-            </div>
           </div>
         </div>
-      )}
-      {!paperContent && <Skeleton title={paper.title} />}
+        <div className="mx-4 flex">
+          <div>
+            {paper?.authors.map((a, i) => (
+              <span key={i} className="text-lg font-bold">
+                {a.name} {i === paper.authors.length - 1 ? "" : " | "}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="mx-4 group flex">
+          <a
+            href={paper.pdfUrl}
+            target="_blank"
+            className="underline font-bold text-lg"
+          >
+            Original Pdf
+            <IconArrowRight className="ml-0.5 inline-block scale-x-125 font-bold group-hover:-rotate-12" />
+          </a>
+          <p className="font-bold ml-auto text-lg">
+            Published:{" "}
+            {dayjs(paper.publishedDate as string).format(
+              "MMMM D, YYYY [at] h:mm A"
+            )}
+          </p>
+        </div>
+
+        <p className="mx-4 text-lg mb-2 mt-4">{paper.abstract}</p>
+
+        <div className="marquee bg-yellow-50 z-50 border-t-2 border-b-2 py-2">
+          <p className="text-xl">
+            <strong className="font-semibold">
+              &nbsp; AI-Generated Content:
+            </strong>{" "}
+            This content was generated and refined by Gemini Pro AI. While we've
+            aimed for high fidelity, please note that AI-generated content can
+            sometimes contain inaccuracies or formatting discrepancies. We
+            recommend reviewing the output.
+          </p>
+          <p className="text-xl">
+            <strong className="font-semibold">
+              &nbsp; AI-Generated Content:
+            </strong>{" "}
+            This content was generated and refined by Gemini Flash AI. While
+            we've aimed for high fidelity, please note that AI-generated content
+            can sometimes contain inaccuracies or formatting discrepancies. We
+            recommend reviewing the output.
+          </p>
+        </div>
+
+        <div ref={containerRef} className="px-4">
+          <div
+            className="paper-content text-xl"
+            dangerouslySetInnerHTML={{ __html: paper.html }}
+          ></div>
+        </div>
+        <div className="mt-4 px-4">
+          <h2 className="text-2xl font-semibold mb-2 "> Related Articles</h2>
+          <div className="flex gap-4">
+            {relatedPapers &&
+              relatedPapers?.map((item: Paper, i) => (
+                <BentoGridItem
+                  index={i}
+                  key={i}
+                  id={item._id}
+                  className="md:col-span-4 flex-1"
+                  category={item.primaryCategory}
+                  title={item.title}
+                  description={item.abstract}
+                />
+              ))}
+          </div>
+        </div>
+      </div>
+      {/* {!paper && <Skeleton title={paper.title} />} */}
     </div>
   );
 };
 
-function Skeleton({ title }: { title: string }) {
+function Skeleton() {
   return (
     <div className="mt-4 px-4">
       <h1
@@ -221,7 +221,7 @@ function Skeleton({ title }: { title: string }) {
           space_mono.className
         )}
       >
-        {title}
+        {/* {title} */}
       </h1>
       <div role="status" className="space-y-2.5 mt-8 animate-pulse max-w-4xl">
         {[...Array(10).keys()].map((el) => {

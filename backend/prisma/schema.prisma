@@ -29,6 +29,7 @@ model Paper {
   doiUrl String?
   comment String[]
   embeddings Float[]
+  html String?
   retrievalTimestamp DateTime @default(now())
 }
 
