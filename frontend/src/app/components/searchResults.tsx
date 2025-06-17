@@ -7,7 +7,7 @@ import { Paper, PublishedDate } from "../interfaces";
 const SearchResults = ({ items }: { items: Paper[] }) => {
   return (
     <>
-      <BentoGrid className="max-w-5xl mt-20 mx-auto gap-6 md:auto-rows-[15rem]">
+      <BentoGrid className="max-w-5xl max-lg:max-w-3xl mt-20 mx-auto gap-6 md:auto-rows-[15rem]">
         {items &&
           items.length !== 0 &&
           items.map((item: Paper, i) => (

@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { categories, cn } from "../lib/utils";
 import { Paper } from "../interfaces";
-import { BentoGridItem } from "./ui/bentogrid";
+import { BentoGrid, BentoGridItem } from "./ui/bentogrid";
 import { IconArrowRight } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import axios from "axios";
@@ -58,15 +58,15 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
   return (
     <div
       className={cn(
-        "max-w-6xl border-r-2 border-l-2  mx-auto pt-40",
+        "lg:max-w-6xl max-lg:max-w-4xl max-sm:max-w-[95%] border-r-2 border-l-2 mx-auto pt-40",
         space_gr.className
       )}
     >
       <div className="border-t-2 border-b-2 pb-8">
-        <div className="flex items-end px-4 pb-4">
+        <div className="flex items-end sm:px-4 max-sm:px-1 pb-4">
           <h1
             className={cn(
-              "text-8xl font-extrabold capitalize max-w-[60%] break-words leading-[6.3rem] ",
+              "md:text-8xl max-md:text-7xl max-sm:text-6xl font-extrabold capitalize md:max-w-[60%] max-md:max-w-[80%] break-words md:leading-[6.3rem] max-md:leading-[5rem] max-sm:leading-[4rem]",
               space_mono.className
             )}
           >
@@ -74,30 +74,33 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
           </h1>
 
           <div className="flex flex-1 gap-2 justify-end ">
-            <p className="text-xl font-bold">
+            <p className="text-xl max-md:text-base max-md:text-right font-bold max-sm:hidden">
               {categories[paper.primaryCategory as keyof typeof categories]}
+            </p>
+            <p className="text-xl max-md:text-base max-md:text-right font-bold sm:hidden">
+              AI
             </p>
           </div>
         </div>
-        <div className="mx-4 flex">
+        <div className="sm:mx-4 max-sm:mx-1 flex">
           <div>
             {paper?.authors.map((a, i) => (
-              <span key={i} className="text-lg font-bold">
+              <span key={i} className="md:text-lg max-md:text-md font-bold">
                 {a.name} {i === paper.authors.length - 1 ? "" : " | "}
               </span>
             ))}
           </div>
         </div>
-        <div className="mx-4 group flex">
+        <div className="mx-4 max-sm:mx-1 group flex max-sm:flex-wrap ">
           <a
             href={paper.pdfUrl}
             target="_blank"
-            className="underline font-bold text-lg"
+            className="underline font-bold md:text-lg max-md:text-md"
           >
             Original Pdf
             <IconArrowRight className="ml-0.5 inline-block scale-x-125 font-bold group-hover:-rotate-12" />
           </a>
-          <p className="font-bold ml-auto text-lg">
+          <p className="font-bold sm:ml-auto md:text-lg  max-md:text-md">
             Published:{" "}
             {dayjs(paper.publishedDate as string).format(
               "MMMM D, YYYY [at] h:mm A"
@@ -105,7 +108,9 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
           </p>
         </div>
 
-        <p className="mx-4 text-lg mb-2 mt-4">{paper.abstract}</p>
+        <p className="sm:mx-4 max-sm:mx-1 md:text-lg mb-2 mt-4 max-md:text-md">
+          {paper.abstract}
+        </p>
 
         <div className="marquee bg-yellow-50 z-50 border-t-2 border-b-2 py-2">
           <p className="text-xl">
@@ -130,15 +135,15 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
           </p>
         </div>
 
-        <div ref={containerRef} className="px-4">
+        <div ref={containerRef} className="sm:px-4 max-sm:px-1">
           <div
-            className="paper-content text-xl"
+            className="paper-content md:text-xl max-md:text-md "
             dangerouslySetInnerHTML={{ __html: paper.html }}
           ></div>
         </div>
-        <div className="mt-4 px-4">
+        <div className="mt-4 sm:px-4 max-sm:px-1">
           <h2 className="text-2xl font-semibold mb-2 "> Related Articles</h2>
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap max-sm:flex-col">
             {relatedPapers &&
               relatedPapers?.map((item: Paper, i) => (
                 <BentoGridItem

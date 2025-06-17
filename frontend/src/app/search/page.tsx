@@ -5,6 +5,10 @@ import SearchResults from "../components/searchResults";
 import Footer from "../components/footer";
 import axios from "axios";
 
+export const metadata = {
+  title: "Cognito - Search Results",
+};
+
 const page = async ({
   searchParams,
 }: {
@@ -28,8 +32,10 @@ const page = async ({
   return (
     <>
       <Navbar />
-      <div className="mt-40 max-w-5xl mx-auto">
-        <SearchBar sticky />
+      <div className="mt-40 max-w-5xl max-lg:max-w-3xl max-lg:px-4 max-md:w-[85%] mx-auto">
+        <div className="lg:w-4xl max-lg:w-2xl max-sm:w-[85%] mx-auto">
+          <SearchBar sticky />
+        </div>
         {searchResults && <SearchResults items={searchResults} />}
       </div>
       <Footer />
