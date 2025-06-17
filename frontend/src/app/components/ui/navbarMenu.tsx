@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { ReactNode } from "react";
 
 export const Menu = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -9,7 +9,11 @@ export const Menu = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const HoveredLink = ({ children, ...rest }: any) => {
+interface HoveredLinkProps
+  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  children: ReactNode;
+}
+export const HoveredLink = ({ children, ...rest }: HoveredLinkProps) => {
   return (
     <a {...rest} className="text-gray-500 hover:text-black ">
       {children}

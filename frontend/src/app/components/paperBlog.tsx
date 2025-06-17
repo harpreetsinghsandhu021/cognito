@@ -2,9 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { categories, cn } from "../lib/utils";
-import { Id, Paper } from "../interfaces";
+import { Paper } from "../interfaces";
 import { BentoGridItem } from "./ui/bentogrid";
-import { title } from "process";
 import { IconArrowRight } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import axios from "axios";
@@ -26,21 +25,21 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | undefined>(
     undefined
   );
-  async function fetchRelatedPapers() {
-    const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/papers/getRelatedPapers/${id}`
-    );
-
-    if (res.status === 200) {
-      const data = res.data;
-
-      setRelatedPapers(data.data);
-    }
-  }
 
   useEffect(() => {
+    async function fetchRelatedPapers() {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/papers/getRelatedPapers/${id}`
+      );
+
+      if (res.status === 200) {
+        const data = res.data;
+
+        setRelatedPapers(data.data);
+      }
+    }
     fetchRelatedPapers();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -115,9 +114,9 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
               &nbsp; AI-Generated Content:
             </strong>{" "}
             This content was generated and refined by Gemini Flash AI. While
-            we've aimed for high fidelity, please note that AI-generated content
-            can sometimes contain inaccuracies or formatting discrepancies. We
-            recommend reviewing the output.
+            we&apos;ve aimed for high fidelity, please note that AI-generated
+            content can sometimes contain inaccuracies or formatting
+            discrepancies. We recommend reviewing the output.
           </p>
           <p className="text-xl">
             <strong className="font-semibold">
@@ -125,9 +124,9 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
               &nbsp; AI-Generated Content:
             </strong>{" "}
             This content was generated and refined by Gemini Flash AI. While
-            we've aimed for high fidelity, please note that AI-generated content
-            can sometimes contain inaccuracies or formatting discrepancies. We
-            recommend reviewing the output.
+            we&apos;ve aimed for high fidelity, please note that AI-generated
+            content can sometimes contain inaccuracies or formatting
+            discrepancies. We recommend reviewing the output.
           </p>
         </div>
 
@@ -155,54 +154,8 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
           </div>
         </div>
       </div>
-      {/* {!paper && <Skeleton title={paper.title} />} */}
     </div>
   );
 };
-
-function Skeleton() {
-  return (
-    <div className="mt-4 px-4">
-      <h1
-        className={cn(
-          "text-8xl font-extrabold text-gray-200 animate-pulse break-words capitalize max-w-[40%] leading-[6.3rem] ",
-          space_mono.className
-        )}
-      >
-        {/* {title} */}
-      </h1>
-      <div role="status" className="space-y-2.5 mt-8 animate-pulse max-w-4xl">
-        {[...Array(10).keys()].map((el) => {
-          return (
-            <div className="flex flex-col gap-3" key={el}>
-              <div className="flex gap-4 items-center w-full">
-                <div className="h-2.5 bg-gray-200 rounded-full  w-32"></div>
-                <div className="h-2.5 ms-2 bg-gray-300 rounded-full  w-24"></div>
-                <div className="h-2.5 ms-2 bg-gray-300 rounded-full  w-full"></div>
-              </div>
-              <div className="flex items-center w-full max-w-[480px]">
-                <div className="h-2.5 bg-gray-200 rounded-full  w-full"></div>
-                <div className="h-2.5 ms-2 bg-gray-300 rounded-full  w-full"></div>
-                <div className="h-2.5 ms-2 bg-gray-300 rounded-full  w-24"></div>
-              </div>
-
-              <div role="status" className="animate-pulse">
-                <div className="h-2.5 bg-gray-200 rounded-full w-48 mb-4"></div>
-                <div className="h-2 bg-gray-200 rounded-full w-full mb-2.5"></div>
-                <div className="h-2 bg-gray-200 rounded-full w-1/2 mb-2.5"></div>
-                <div className="h-2 bg-gray-200 rounded-full w-3/4 mb-2.5"></div>
-                <div className="h-2 bg-gray-200 rounded-full w-full mb-2.5"></div>
-                <div className="h-2 bg-gray-200 rounded-full w-80 "></div>
-                <span className="sr-only">Loading...</span>
-              </div>
-            </div>
-          );
-        })}
-
-        <span className="sr-only">Loading...</span>
-      </div>
-    </div>
-  );
-}
 
 export default PaperBlog;
