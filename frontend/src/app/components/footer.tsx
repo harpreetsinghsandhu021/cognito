@@ -9,16 +9,16 @@ const space_mono = Space_Mono({
 
 const Footer = () => {
   return (
-    <div className="max-w-5xl mx-auto relative my-10">
+    <div className="lg:max-w-5xl max-lg:max-w-2xl mx-auto relative my-10">
       <h2
         className={cn(
-          "text-[14rem] font-bold text-center leading-44",
+          "lg:text-[14rem] max-lg:text-[10rem] max-md:text-[8rem] max-sm:text-7xl max-sm:text-left max-sm:px-4 font-bold text-center leading-44",
           space_mono.className
         )}
       >
         Cognito
       </h2>
-      <p className="text-sm text-left absolute top-45 left-[45%] font-normal">
+      <p className="text-sm text-left absolute top-45 left-[45%] max-sm:top-36 max-sm:left-20 font-normal">
         What research insights are you looking for?
       </p>
     </div>

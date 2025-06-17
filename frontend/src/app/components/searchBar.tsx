@@ -42,11 +42,11 @@ const SearchBar = ({ sticky }: { sticky?: boolean }) => {
         placeholder={"What research insights are you looking for?"}
         defaultValue={query ? query : ""}
         className={cn(
-          "w-full bg-white shadow-2xl font-bold focus:outline-none border-2 rounded-3xl py-4 px-2 text-xl"
+          "w-full bg-white shadow-2xl font-bold focus:outline-none border-2 rounded-3xl py-4 px-2  md:text-xl max-md:text-sm max-sm:py-2"
         )}
       />
       <button type="submit" className="absolute top-5 right-5">
-        <IconSearch className="scale-125 text-slate-700" />
+        <IconSearch className="scale-125 text-slate-700 max-sm:scale-0" />
       </button>
     </form>
   );

@@ -11,9 +11,9 @@ export async function List() {
   const items = data.data.data.recentPapers;
 
   return (
-    <div className="max-w-5xl -mt-44 mx-auto">
+    <div className="lg:max-w-5xl max-lg:max-w-4xl max-lg:px-4 lg:-mt-44 md:-mt-56 max-md:mt-30 mx-auto">
       <h2 className="text-2xl font-semibold mb-2 ">Recent Papers</h2>
-      <BentoGrid className="gap-6 md:auto-rows-[18rem]">
+      <BentoGrid className="gap-6 lg:auto-rows-[18rem]">
         {items &&
           items?.map((item: Paper & { className: string }, i: number) => (
             <BentoGridItem

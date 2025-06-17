@@ -5,6 +5,10 @@ import { Paper } from "@/app/interfaces";
 import axios from "axios";
 import React from "react";
 
+export const metadata = {
+  title: "Cognito - Paper",
+};
+
 const page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = await params;
   let paper: null | Paper = null;

@@ -72,14 +72,14 @@ export const BentoGridItem = ({
             {category && categories[category as keyof typeof categories]}
           </h6>
           <div
-            className={`mb-2 text-2xl font-bold text-[#16092F]  ${
+            className={`mb-2 lg:text-2xl max-lg:text-xl  font-bold text-[#16092F]  ${
               className === "md:col-span-3" ? "line-clamp-1" : "line-clamp-3"
             }`}
           >
             {title}
           </div>
           <div
-            className={`text-md pr-2 text-[#16092F] ${
+            className={`lg:text-md max-lg:text-base pr-2 text-[#16092F] ${
               className === "md:col-span-2" ? "line-clamp-4" : "line-clamp-3"
             }`}
           >
