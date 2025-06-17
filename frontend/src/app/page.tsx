@@ -6,6 +6,7 @@ import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { Navbar } from "./components/navbar";
 import { IconSearch } from "@tabler/icons-react";
 import SearchBar from "./components/searchBar";
+import Footer from "./components/footer";
 
 const space_gr = Space_Grotesk({
   weight: ["300", "400", "500", "600", "700"],
@@ -40,6 +41,7 @@ export default function Home() {
         </div>
       </BackgroundLines>
       <List />
+      <Footer />
     </>
   );
 }

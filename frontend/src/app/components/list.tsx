@@ -1,12 +1,5 @@
-import { cn } from "../lib/utils";
 import React from "react";
 import { BentoGrid, BentoGridItem } from "./ui/bentogrid";
-import {
-  IconClipboardCopy,
-  IconFileBroken,
-  IconSignature,
-  IconTableColumn,
-} from "@tabler/icons-react";
 import axios from "axios";
 import { Paper } from "../interfaces";
 
@@ -20,7 +13,7 @@ export async function List() {
   console.log(items);
 
   return (
-    <div className="max-w-5xl mb-8 -mt-44 mx-auto">
+    <div className="max-w-5xl -mt-44 mx-auto">
       <h2 className="text-2xl font-semibold mb-2 ">Recent Papers</h2>
       <BentoGrid className="gap-6 md:auto-rows-[18rem]">
         {items &&
