@@ -101,7 +101,7 @@ export const BentoGridItem = ({
               {className === "md:col-span-2" ? (
                 <span> {authors && authors[0]?.name},</span>
               ) : (
-                <span> {authors && authors[0]?.name}...</span>
+                <span> {authors && authors[0]?.name.slice(0, 14)}...</span>
               )}
 
               {className === "md:col-span-2" && (

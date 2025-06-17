@@ -1,3 +1,4 @@
+import Footer from "@/app/components/footer";
 import { Navbar } from "@/app/components/navbar";
 import PaperBlog from "@/app/components/paperBlog";
 import { Paper } from "@/app/interfaces";
@@ -21,6 +22,7 @@ const page = async ({ params }: { params: Promise<{ id: string }> }) => {
     <main>
       <Navbar />
       {paper && <PaperBlog id={id} paper={paper} />}
+      <Footer />
     </main>
   );
 };

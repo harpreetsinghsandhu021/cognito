@@ -113,7 +113,7 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
   return (
     <div
       className={cn(
-        "max-w-6xl border-r-2 border-l-2  mx-auto pt-40 pb-40",
+        "max-w-6xl border-r-2 border-l-2  mx-auto pt-40",
         space_gr.className
       )}
     >
@@ -165,15 +165,17 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
         <div className="marquee bg-yellow-50 z-50 border-t-2 border-b-2 py-2">
           <p className="text-xl">
             <strong className="font-semibold">
+              {" "}
               &nbsp; AI-Generated Content:
             </strong>{" "}
-            This content was generated and refined by Gemini Pro AI. While we've
-            aimed for high fidelity, please note that AI-generated content can
-            sometimes contain inaccuracies or formatting discrepancies. We
+            This content was generated and refined by Gemini Flash AI. While
+            we've aimed for high fidelity, please note that AI-generated content
+            can sometimes contain inaccuracies or formatting discrepancies. We
             recommend reviewing the output.
           </p>
           <p className="text-xl">
             <strong className="font-semibold">
+              {" "}
               &nbsp; AI-Generated Content:
             </strong>{" "}
             This content was generated and refined by Gemini Flash AI. While

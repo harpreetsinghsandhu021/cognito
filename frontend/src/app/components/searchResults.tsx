@@ -39,7 +39,7 @@ const SearchResults = () => {
   return (
     <>
       {loading && <Loader className="my-20" />}
-      <BentoGrid className="max-w-5xl my-20 mx-auto gap-6 md:auto-rows-[15rem]">
+      <BentoGrid className="max-w-5xl mt-20 mx-auto gap-6 md:auto-rows-[15rem]">
         {items &&
           items.length !== 0 &&
           !loading &&
