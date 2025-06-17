@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { categories, cn } from "../lib/utils";
 import { Paper } from "../interfaces";
-import { BentoGrid, BentoGridItem } from "./ui/bentogrid";
+import { BentoGridItem } from "./ui/bentogrid";
 import { IconArrowRight } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import axios from "axios";
