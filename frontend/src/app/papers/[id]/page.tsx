@@ -10,7 +10,9 @@ const page = async ({ params }: { params: Promise<{ id: string }> }) => {
   let paper: null | Paper = null;
 
   try {
-    const res = await axios.get(`http://localhost:8000/api/v1/papers/${id}`);
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/papers/${id}`
+    );
     if (res.status == 200) {
       paper = res.data.data;
     }

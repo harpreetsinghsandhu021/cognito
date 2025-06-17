@@ -17,10 +17,8 @@ const SearchResults = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:8000/api/v1/papers/search/semantic?limit=10&size=20&query=${query}`
+        `${process.env.NEXT_PUBLIC_API_URL}/papers/search/semantic?limit=10&size=20&query=${query}`
       );
-
-      console.log(res);
 
       if (res.status == 200) {
         setItems(res.data.data);
