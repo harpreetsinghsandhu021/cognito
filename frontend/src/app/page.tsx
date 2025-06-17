@@ -1,20 +1,14 @@
 import { List } from "./components/list";
 import { BackgroundLines } from "./components/hero";
-import { motion } from "motion/react";
 
-import { Space_Grotesk, Space_Mono } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import { Navbar } from "./components/navbar";
-import { IconSearch } from "@tabler/icons-react";
 import SearchBar from "./components/searchBar";
 import Footer from "./components/footer";
+import { Suspense } from "react";
 
 const space_gr = Space_Grotesk({
   weight: ["300", "400", "500", "600", "700"],
-  subsets: ["latin", "vietnamese"],
-});
-
-const space_mono = Space_Mono({
-  weight: ["400", "700"],
   subsets: ["latin", "vietnamese"],
 });
 
@@ -36,7 +30,9 @@ export default function Home() {
             truly resonate.
           </p>
           <div className="w-4xl">
-            <SearchBar />
+            <Suspense fallback={<div></div>}>
+              <SearchBar />
+            </Suspense>
           </div>
         </div>
       </BackgroundLines>

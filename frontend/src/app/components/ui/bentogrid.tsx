@@ -1,18 +1,13 @@
 "use client";
 
-import { IconArrowNarrowRight, IconArrowRight } from "@tabler/icons-react";
+import { IconArrowRight } from "@tabler/icons-react";
 import { categories, cn, pastels } from "../../lib/utils";
-import { Space_Grotesk, Space_Mono } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import { Author, Id, PublishedDate } from "@/app/interfaces";
 import { useRouter } from "next/navigation";
 
 const space_gr = Space_Grotesk({
   weight: ["300", "400", "500", "600", "700"],
-  subsets: ["latin", "vietnamese"],
-});
-
-const space_mono = Space_Mono({
-  weight: ["400", "700"],
   subsets: ["latin", "vietnamese"],
 });
 
@@ -40,10 +35,8 @@ export const BentoGridItem = ({
   className,
   id,
   title,
-  complete,
   description,
   category,
-  publishedDate,
   authors,
   header,
 }: {

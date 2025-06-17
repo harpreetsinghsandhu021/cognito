@@ -21,7 +21,7 @@ const SearchBar = ({ sticky }: { sticky?: boolean }) => {
   }
 
   useEffect(() => {
-    window.onscroll = (e: Event) => {
+    window.onscroll = () => {
       setScrollHeight(window.scrollY);
     };
   }, []);

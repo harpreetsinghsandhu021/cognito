@@ -1,46 +1,15 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React from "react";
 import { BentoGrid, BentoGridItem } from "./ui/bentogrid";
-import { useSearchParams } from "next/navigation";
-import axios from "axios";
-import Loader from "./ui/loader";
 import { Paper, PublishedDate } from "../interfaces";
 
-const SearchResults = () => {
-  const searchParams = useSearchParams();
-  const [items, setItems] = useState<Paper[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const query = searchParams.get("query");
-
-  async function fetchResults(query: string) {
-    try {
-      setLoading(true);
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/papers/search/semantic?limit=10&size=20&query=${query}`
-      );
-
-      if (res.status == 200) {
-        setItems(res.data.data);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-    setLoading(false);
-  }
-  useEffect(() => {
-    if (query) {
-      fetchResults(query);
-    }
-  }, [query]);
-
+const SearchResults = ({ items }: { items: Paper[] }) => {
   return (
     <>
-      {loading && <Loader className="my-20" />}
       <BentoGrid className="max-w-5xl mt-20 mx-auto gap-6 md:auto-rows-[15rem]">
         {items &&
           items.length !== 0 &&
-          !loading &&
           items.map((item: Paper, i) => (
             <BentoGridItem
               key={i}
