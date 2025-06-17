@@ -26,67 +26,13 @@ const PaperBlog = ({ id, paper }: { id: string; paper: Paper }) => {
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | undefined>(
     undefined
   );
-
-  // useEffect(() => {
-  //   if (paper.pdfUrl) {
-  //     const controller = new AbortController();
-  //     fetch(
-  //       `http://localhost:8000/api/v1/papers/getMarkup?pdfUrl=${paper.pdfUrl}`,
-  //       {
-  //         signal: controller.signal,
-  //       }
-  //     )
-  //       .then(async (res) => {
-  //         const reader = res.body?.getReader();
-  //         readerRef.current = reader;
-  //         const decoder = new TextDecoder();
-
-  //         while (true) {
-  //           const text = await reader?.read();
-  //           if (text?.done) break;
-
-  //           const chunk = decoder.decode(text?.value);
-  //           try {
-  //             if (chunk) {
-  //               const data = JSON.parse(chunk);
-  //               console.log(data);
-
-  //               setPaperContent((prevPaperContent) =>
-  //                 prevPaperContent.concat(data)
-  //               );
-  //             }
-  //           } catch (error: Error | any) {
-  //             if (error.name !== "AbortError") {
-  //               console.log("Stream error:", error);
-  //             }
-  //           }
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         if (error.name !== "AbortError") {
-  //           console.log("Fetch error:", error);
-  //         }
-  //       });
-
-  //     return () => {
-  //       controller.abort();
-  //       if (readerRef.current) {
-  //         readerRef.current.cancel();
-  //       }
-  //     };
-  //   }
-  // }, [paper.pdfUrl]);
-
   async function fetchRelatedPapers() {
-    console.log(paper);
-
     const res = await axios.get(
-      `http://localhost:8000/api/v1/papers/getRelatedPapers/${id}`
+      `${process.env.NEXT_PUBLIC_API_URL}/papers/getRelatedPapers/${id}`
     );
 
     if (res.status === 200) {
       const data = res.data;
-      console.log(data);
 
       setRelatedPapers(data.data);
     }

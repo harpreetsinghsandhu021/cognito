@@ -5,12 +5,10 @@ import { Paper } from "../interfaces";
 
 export async function List() {
   const data = await axios.get(
-    `http://localhost:8000/api/v1/papers/getHomeData`
+    `${process.env.NEXT_PUBLIC_API_URL}/papers/getHomeData`
   );
 
   const items = data.data.data.recentPapers;
-
-  console.log(items);
 
   return (
     <div className="max-w-5xl -mt-44 mx-auto">

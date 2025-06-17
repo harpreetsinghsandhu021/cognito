@@ -15,7 +15,6 @@ const SearchBar = ({ sticky }: { sticky?: boolean }) => {
   async function handleSearch(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (inputRef.current) {
-      console.log(inputRef.current.value);
       const query = inputRef.current.value;
       router.push(`/search?query=${query}`);
     }
