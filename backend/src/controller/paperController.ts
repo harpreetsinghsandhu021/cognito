@@ -2,13 +2,15 @@ import { Response, Request } from "express";
 import catchAsync from "../lib/catchAsync";
 import prisma from "../utils/prisma";
 import { generateEmbedding } from "../utils/embeddings";
+import { generateEmbeddingsHuggingFace } from "../utils/generateEmbeddings";
 require("dotenv").config();
 
 export const getSearchResults = catchAsync(
   async (req: Request, res: Response) => {
     const { limit, size, query } = req.query;
 
-    const queryVector = await generateEmbedding(query as string);
+    // const queryVector = await generateEmbedding(query as string);
+    const queryVector = await generateEmbeddingsHuggingFace(query as string);
 
     const results = await prisma.$runCommandRaw({
       aggregate: "Paper",
@@ -106,7 +108,9 @@ export const getRelatedPapers = catchAsync(
       });
     }
 
-    const queryVector = await generateEmbedding(sourcePaper.abstract);
+    const queryVector = await generateEmbeddingsHuggingFace(
+      sourcePaper.abstract
+    );
 
     const results = await prisma.$runCommandRaw({
       aggregate: "Paper",
@@ -267,8 +271,6 @@ const generateBentoClassName = (index: number): string => {
     "md:col-span-1",
     "md:col-span-1",
     "md:col-span-2",
-    "md:col-span-2",
-    "md:col-span-1",
   ];
   return patterns[index % patterns.length];
 };

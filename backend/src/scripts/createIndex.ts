@@ -4,7 +4,7 @@ async function createEmbeddingsIndex() {
   const collectionName = "Paper";
   const indexName = "vector_index";
   const vectorField = "embeddings";
-  const dimensions = 3072;
+  const dimensions = 768;
   const similarityMetric = "cosine";
 
   try {
